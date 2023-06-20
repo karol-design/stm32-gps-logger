@@ -33,7 +33,7 @@
 /* USER CODE BEGIN PD */
 
 #define NMEA_0183_MAX_MESSAGE_LENGTH 82	// Messages have a maximum length of 82 characters
-#define NEO_6M_MESSAGES_PER_BURST 8		// NEO-6M sends 8 messages per burst
+#define NEO_6M_MAX_MESSAGES_PER_BURST 9	// NEO-6M sends 9 messages per burst at most
 
 /* USER CODE END PD */
 
@@ -104,10 +104,11 @@ int main(void)
 
 	while (1)
 	{
-		uint8_t burstBuffer[NEO_6M_MESSAGES_PER_BURST][NMEA_0183_MAX_MESSAGE_LENGTH];
-		size_t messageSize[NEO_6M_MESSAGES_PER_BURST];
+		uint8_t burstBuffer[NEO_6M_MAX_MESSAGES_PER_BURST][NMEA_0183_MAX_MESSAGE_LENGTH];
+		size_t messageSize[NEO_6M_MAX_MESSAGES_PER_BURST];
 		uint8_t messageCount = 0;
 		uint8_t byteInMessage = 0;
+		uint8_t burstBegan = 0;
 		uint8_t byteRead;
 
 		while (1) {
@@ -127,6 +128,7 @@ int main(void)
 					messageCount = 0;   // Current message in a burst
 					strncpy(*(burstBuffer + messageCount), "$GPRMC", 6);
 					HAL_UART_Transmit(&huart2, "\nRMC sentence decoded\n", strlen("\nRMC sentence decoded\n"), HAL_MAX_DELAY);
+					burstBegan = 1;
 				}
 
 				byteInMessage = 6;  // Current byte in a message, counting from 0
@@ -142,8 +144,14 @@ int main(void)
 				} while (byteRead != 0x0a); // Continue until Line Feed (LF or 0x0a in ASCI) is encountered
 
 				messageSize[messageCount] = (byteInMessage);
+				
+				// Test if it is an GLL sentence (which is last in every data burst of NEO-6M)
+				uint8_t isSentenceGLL = !(strncmp((*(burstBuffer + messageCount) + 1), "GPGLL", 5));
+
 				messageCount++;
-				if(messageCount >= NEO_6M_MESSAGES_PER_BURST) {
+
+				// Break if no. of messages limit was reached or last message in a burst was read
+				if(messageCount >= NEO_6M_MAX_MESSAGES_PER_BURST || (isSentenceGLL == 1 && burstBegan == 1)) {
 					break;
 				}
 			}
@@ -151,7 +159,7 @@ int main(void)
 
 		HAL_UART_Transmit(&huart2, "Finished reading\n\n\n", strlen("Finished reading\n\n\n"), HAL_MAX_DELAY);
 
-		for(int i = 0; i < NEO_6M_MESSAGES_PER_BURST; i++) {
+		for(int i = 0; i < messageCount; i++) {
 			HAL_UART_Transmit(&huart2, (*(burstBuffer + i)), messageSize[i], HAL_MAX_DELAY);
 		}
 
