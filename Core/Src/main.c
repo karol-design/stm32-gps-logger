@@ -108,7 +108,7 @@ int main(void) {
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 
-	printf("GPS Monitor Startup\n\n");
+	printf("\n\nGPS Monitor Startup\n");
 
 	ublox_neo6m_ConfigStruct neo6m_conf = {
 			.huartNeo6m = &huart1,

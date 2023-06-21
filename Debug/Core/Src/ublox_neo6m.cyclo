@@ -1,2 +1,2 @@
 ublox_neo6m.c:10:23:ublox_neo6m_init	1
-ublox_neo6m.c:14:23:ublox_neo6m_readData	9
+ublox_neo6m.c:17:23:ublox_neo6m_readData	6
