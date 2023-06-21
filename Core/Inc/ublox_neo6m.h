@@ -38,14 +38,14 @@ typedef struct {
 } ublox_neo6m_ConfigStruct;
 
 typedef struct {
-	uint8_t isGpsActive;	// GPS Location defined flag
-	int32_t coordLatitude;	// Latitude value (e.g. 1650.05758 eq. to 16°50.05758')
-	int32_t coordLongitude;	// Longitude value (as with Longitude)
-	char coordLatitudeHem;	// Latitude hemisphere (N/S)
-	char coordLongitudeHem;	// Longitude hemisphere (W/E)
-	float altitude;			// Altitude above mean sea level (m)
-	uint32_t time;			// Time of fix, UTC (hhmmss)
-	uint8_t satTracked;		// Number of satellites being tracked
+	uint8_t isGpsActive;			// GPS Location defined flag
+	uint32_t coordLatitude;		// Latitude value (e.g. 1650.05758 eq. to 16°50.05758')
+	uint32_t coordLongitude;	// Longitude value (as with Longitude)
+	uint8_t coordLatitudeHem;	// Latitude hemisphere (N/S)
+	uint8_t coordLongitudeHem;	// Longitude hemisphere (W/E)
+	uint32_t altitude;			// Altitude above mean sea level (cm)
+	uint32_t time;					// Time of fix, UTC (hhmmss)
+	uint8_t satTracked;			// Number of satellites being tracked
 } ublox_neo6m_DataStruct;
 
 ublox_neo6m_ErrorType ublox_neo6m_init(ublox_neo6m_ConfigStruct *devConfig);

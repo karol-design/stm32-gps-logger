@@ -1,2 +1,4 @@
 ublox_neo6m.c:10:23:ublox_neo6m_init	1
-ublox_neo6m.c:17:23:ublox_neo6m_readData	7
+ublox_neo6m.c:14:30:ublox_neo6m_parseNMEA0813	1
+ublox_neo6m.c:34:30:ublox_neo6m_resetDataStruct	1
+ublox_neo6m.c:51:23:ublox_neo6m_readData	7

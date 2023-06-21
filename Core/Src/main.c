@@ -109,8 +109,6 @@ int main(void) {
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 
-	printf("\n\nGPS Monitor Startup\n");
-
 	ublox_neo6m_ConfigStruct neo6m_conf = {
 			.huartNeo6m = &huart3,
 			.huartLogging = &huart2 };
@@ -118,9 +116,11 @@ int main(void) {
 	ublox_neo6m_DataStruct neo6m_data;
 	ublox_neo6m_ErrorType err = UBLOX_OK;
 
+	printf("\033[2JGPS Monitor Startup\n");
+
 	err = ublox_neo6m_init(&neo6m_conf);
 	if (err == UBLOX_OK) {
-		printf("Dbg: U-blox NEO-6M Initialised correctly\n");
+		printf("Dbg: U-blox NEO-6M Initialised correctly\n\n");
 	} else {
 		printf("Err: U-blox NEO-6M Initialisation error!\n");
 	}
@@ -132,6 +132,15 @@ int main(void) {
 	} while (err != UBLOX_OK);
 
 	printf("Dbg: U-blox NEO-6M Data read correctly\n");
+
+	printf("\n\n--------------- GPS Data ---------------\n");
+	printf("| GPS Status:\t\t%u\t\t|\n", neo6m_data.isGpsActive);
+	printf("| Satellites tracked:\t%u\t\t|\n", neo6m_data.satTracked);
+	printf("| Latitude:\t\t%u %c\t|\n", neo6m_data.coordLatitude, neo6m_data.coordLatitudeHem);
+	printf("| Longitude:\t\t%u %c\t|\n", neo6m_data.coordLongitude, neo6m_data.coordLongitudeHem);
+	printf("| Altitude:\t\t%d cm\t\t|\n", neo6m_data.altitude);
+	printf("| Time:\t\t\t%d\t\t|\n", neo6m_data.time);
+	printf("-----------------------------------------\n");
 
 	while (1) {
 		// Blink an LED to indicate that new data has been received

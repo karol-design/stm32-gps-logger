@@ -11,19 +11,53 @@ ublox_neo6m_ErrorType ublox_neo6m_init(ublox_neo6m_ConfigStruct *devConfig) {
 	return (UBLOX_OK);
 }
 
+static ublox_neo6m_ErrorType ublox_neo6m_parseNMEA0813(ublox_neo6m_DataStruct *devData, uint8_t *sentenceBuffer) {
+
+	uint32_t tmp_variable = 0; // Temporary variable
+	uint32_t coordLatitudeUnformatedFront, coordLatitudeUnformatedBack, coordLongitudeUnformatedFront,
+			coordLongitudeUnformatedBack, altitudeMeters, altitudeDecimeters;
+
+	// $GPGGA,135139.00,5214.24059,N,01650.06187,E,1,05,1.32,          42.9,M,38.8,M,,*6B
+	sscanf(sentenceBuffer, "$GPGGA,%6lu.%2lu,%4lu.%5lu,%1c,%5lu.%5lu,%1c,%1u,0%1u,%1lu.%2lu,%2lu.%1lu", &devData->time,
+			&tmp_variable, &coordLatitudeUnformatedFront, &coordLatitudeUnformatedBack, &devData->coordLatitudeHem,
+			&coordLongitudeUnformatedFront, &coordLongitudeUnformatedBack, &devData->coordLongitudeHem, &tmp_variable,
+			&devData->satTracked, &tmp_variable, &tmp_variable, &altitudeMeters, &altitudeDecimeters);
+
+	devData->coordLatitude = (coordLatitudeUnformatedFront * 100000U + coordLatitudeUnformatedBack);
+	devData->coordLongitude = (coordLongitudeUnformatedFront * 100000U + coordLongitudeUnformatedBack);
+	devData->altitude = 100 * altitudeMeters + 10 * altitudeDecimeters;
+	devData->isGpsActive = 1;
+
+	return (UBLOX_OK);
+}
+
+static ublox_neo6m_ErrorType ublox_neo6m_resetDataStruct(ublox_neo6m_DataStruct *devData) {
+
+	devData->isGpsActive = 0;			// GPS Location defined flag
+	devData->coordLatitude = 0;		// Latitude value (e.g. 1650.05758 eq. to 16°50.05758')
+	devData->coordLongitude = 0;		// Longitude value (as with Longitude)
+	devData->coordLatitudeHem = 0;	// Latitude hemisphere (N/S)
+	devData->coordLongitudeHem = 0;	// Longitude hemisphere (W/E)
+	devData->altitude = 0.0;			// Altitude above mean sea level (m)
+	devData->time = 0;					// Time of fix, UTC (hhmmss)
+	devData->satTracked = 0;			// Number of satellites being tracked
+
+	return (UBLOX_OK);
+}
+
 /*
  * Read data from the $GPGGA (Global Positioning System Fix Data) sentence.
  */
 ublox_neo6m_ErrorType ublox_neo6m_readData(ublox_neo6m_ConfigStruct *devConfig, ublox_neo6m_DataStruct *devData) {
 
-	uint8_t sentenceBuffer[NMEA_0183_MAX_MESSAGE_LENGTH];
-	uint8_t receivedByte;
-	uint8_t byteInMessage = 0;
-	uint8_t byteRead = 0;
-
 	HAL_StatusTypeDef err = HAL_OK;
 
-	// UART Abort required before first call to UART_Receive (otherwise timeout error)
+	uint8_t sentenceBuffer[NMEA_0183_MAX_MESSAGE_LENGTH];
+	uint8_t receivedByte;
+	size_t byteInMessage = 0;
+	uint8_t byteRead = 0;
+
+// UART Abort required before first call to UART_Receive (otherwise timeout error)
 	err = HAL_UART_Abort(devConfig->huartNeo6m);
 	if (err != HAL_OK) {
 		// Error when aborting any UART tx/rx
@@ -61,7 +95,12 @@ ublox_neo6m_ErrorType ublox_neo6m_readData(ublox_neo6m_ConfigStruct *devConfig, 
 		}
 	}
 
+	err = ublox_neo6m_resetDataStruct(devData);
+
+	// Parse stored NMEA0813 sentence
+	err = ublox_neo6m_parseNMEA0813(devData, sentenceBuffer);
+
 	HAL_UART_Transmit(devConfig->huartLogging, (sentenceBuffer), byteInMessage, HAL_MAX_DELAY);
 
-	return (UBLOX_OK);
+	return (err);
 }
