@@ -17,15 +17,15 @@ ublox_neo6m_ErrorType ublox_neo6m_init(ublox_neo6m_ConfigStruct *devConfig) {
 ublox_neo6m_ErrorType ublox_neo6m_readData(ublox_neo6m_ConfigStruct *devConfig, ublox_neo6m_DataStruct *devData) {
 
 	uint8_t sentenceBuffer[NMEA_0183_MAX_MESSAGE_LENGTH];
+	uint8_t receivedByte;
 	uint8_t byteInMessage = 0;
 	uint8_t byteRead = 0;
 
 	while (1) {
 		// Read last character from the UART buffer and store as the first element of the sentence buffer
-		HAL_StatusTypeDef ret = HAL_UART_Receive(devConfig->huartNeo6m, (sentenceBuffer), 1, 10000);
-		if (ret == HAL_TIMEOUT) {
-			HAL_UART_Transmit(devConfig->huartLogging, "Err, HAL Timeout!", sizeof("Err, HAL Timeout!"),
-			HAL_MAX_DELAY);
+		HAL_StatusTypeDef ret = HAL_ERROR;
+		while (ret != HAL_OK) {
+			ret = HAL_UART_Receive(devConfig->huartNeo6m, sentenceBuffer, 1, 5000);
 		}
 
 		// Test if it is a start character ($) indicating a new sentence
