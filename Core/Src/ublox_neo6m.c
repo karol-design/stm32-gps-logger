@@ -22,33 +22,34 @@ ublox_neo6m_ErrorType ublox_neo6m_readData(ublox_neo6m_ConfigStruct *devConfig, 
 
 	while (1) {
 		// Read last character from the UART buffer and store as the first element of the sentence buffer
-		HAL_StatusTypeDef ret = HAL_UART_Receive(devConfig->huartNeo6m, (sentenceBuffer), 1, 10000);
-		if (ret == HAL_TIMEOUT) {
-			HAL_UART_Transmit(devConfig->huartLogging, "Err, HAL Timeout!", sizeof("Err, HAL Timeout!"),
-			HAL_MAX_DELAY);
+		HAL_StatusTypeDef ret = HAL_ERROR;
+		while (ret != HAL_OK) {
+			ret = HAL_UART_Receive(devConfig->huartNeo6m, sentenceBuffer, 1, 5); // 5 ms timeout
 		}
 
-		// Test if it is a start character ($) indicating a new sentence
-		if ((*sentenceBuffer) == '$') {
-			// Read talker ID and sentence type (5 bytes) and store as 5 consecutive elements of the sentence buffer
-			HAL_UART_Receive(devConfig->huartNeo6m, (sentenceBuffer + 1), 5, HAL_MAX_DELAY);
+		HAL_UART_Transmit(devConfig->huartLogging, (sentenceBuffer), 1, HAL_MAX_DELAY);
 
-			// Proceed only if it is a GGA sentence
-			uint8_t isSentenceGGA = !(strncmp((sentenceBuffer + 1), "GPGGA", 5));
-			byteInMessage = 6; // Current byte in a message, counting from 0
-
-			if (isSentenceGGA == 1) {
-				do {
-					HAL_UART_Receive(devConfig->huartNeo6m, &byteRead, 1, HAL_MAX_DELAY); // Read one char from the UART buffer
-					strncpy((sentenceBuffer + byteInMessage), &byteRead, 1);
-					byteInMessage++;
-
-					// Continue until Line Feed (LF or 0x0a in ASCI) is encountered or max length is reached
-				} while ((byteRead != 0x0a) && (byteInMessage < NMEA_0183_MAX_MESSAGE_LENGTH));
-
-				break;	// Now break from the while loop and return
-			}
-		}
+//		// Test if it is a start character ($) indicating a new sentence
+//		if ((*sentenceBuffer) == '$') {
+//			// Read talker ID and sentence type (5 bytes) and store as 5 consecutive elements of the sentence buffer
+//			HAL_UART_Receive(devConfig->huartNeo6m, (sentenceBuffer + 1), 5, HAL_MAX_DELAY);
+//
+//			// Proceed only if it is a GGA sentence
+//			uint8_t isSentenceGGA = !(strncmp((sentenceBuffer + 1), "GPGGA", 5));
+//			byteInMessage = 6; // Current byte in a message, counting from 0
+//
+//			if (isSentenceGGA == 1) {
+//				do {
+//					HAL_UART_Receive(devConfig->huartNeo6m, &byteRead, 1, HAL_MAX_DELAY); // Read one char from the UART buffer
+//					strncpy((sentenceBuffer + byteInMessage), &byteRead, 1);
+//					byteInMessage++;
+//
+//					// Continue until Line Feed (LF or 0x0a in ASCI) is encountered or max length is reached
+//				} while ((byteRead != 0x0a) && (byteInMessage < NMEA_0183_MAX_MESSAGE_LENGTH));
+//
+//				break;	// Now break from the while loop and return
+//			}
+//		}
 	}
 
 	HAL_UART_Transmit(devConfig->huartLogging, (sentenceBuffer), byteInMessage, HAL_MAX_DELAY);
