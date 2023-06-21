@@ -34,34 +34,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := nucleo-l412rb-blink
+BUILD_ARTIFACT_NAME := l412rb-gps-monitor
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-nucleo-l412rb-blink.elf \
+l412rb-gps-monitor.elf \
 
 MAP_FILES += \
-nucleo-l412rb-blink.map \
+l412rb-gps-monitor.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-nucleo-l412rb-blink.list \
+l412rb-gps-monitor.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: nucleo-l412rb-blink.elf secondary-outputs
+main-build: l412rb-gps-monitor.elf secondary-outputs
 
 # Tool invocations
-nucleo-l412rb-blink.elf nucleo-l412rb-blink.map: $(OBJS) $(USER_OBJS) C:\Users\wojsl\STM32CubeIDE\workspace_1.12.1\nucleo-l412rb-blink\STM32L412RBTXP_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "nucleo-l412rb-blink.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\wojsl\STM32CubeIDE\workspace_1.12.1\nucleo-l412rb-blink\STM32L412RBTXP_FLASH.ld" --specs=nosys.specs -Wl,-Map="nucleo-l412rb-blink.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+l412rb-gps-monitor.elf l412rb-gps-monitor.map: $(OBJS) $(USER_OBJS) C:\Users\wojsl\STM32CubeIDE\workspace_1.12.1\l412rb-gps-monitor\STM32L412RBTXP_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "l412rb-gps-monitor.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\wojsl\STM32CubeIDE\workspace_1.12.1\l412rb-gps-monitor\STM32L412RBTXP_FLASH.ld" --specs=nosys.specs -Wl,-Map="l412rb-gps-monitor.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -70,14 +70,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-nucleo-l412rb-blink.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "nucleo-l412rb-blink.list"
+l412rb-gps-monitor.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "l412rb-gps-monitor.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) default.size.stdout nucleo-l412rb-blink.elf nucleo-l412rb-blink.list nucleo-l412rb-blink.map
+	-$(RM) default.size.stdout l412rb-gps-monitor.elf l412rb-gps-monitor.list l412rb-gps-monitor.map
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)

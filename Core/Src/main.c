@@ -68,8 +68,7 @@ static void MX_USART1_UART_Init(void);
  * @brief  The application entry point.
  * @retval int
  */
-int main(void)
-{
+int main(void) {
 	/* USER CODE BEGIN 1 */
 	/* USER CODE END 1 */
 
@@ -100,10 +99,10 @@ int main(void)
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 
-	HAL_UART_Transmit(&huart2, "Test begin...\n", strlen("Test begin...\n"), HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart2, "Test begin...\n", strlen("Test begin...\n"),
+	HAL_MAX_DELAY);
 
-	while (1)
-	{
+	while (1) {
 		uint8_t burstBuffer[NEO_6M_MAX_MESSAGES_PER_BURST][NMEA_0183_MAX_MESSAGE_LENGTH];
 		size_t messageSize[NEO_6M_MAX_MESSAGES_PER_BURST];
 		uint8_t messageCount = 0;
@@ -113,10 +112,11 @@ int main(void)
 
 		while (1) {
 			// Read only one character from the UART buffer and store as the first element of the current message array
-			HAL_UART_Receive(&huart1, (*(burstBuffer + messageCount)), 1, HAL_MAX_DELAY);
+			HAL_UART_Receive(&huart1, (*(burstBuffer + messageCount)), 1,
+			HAL_MAX_DELAY);
 
 			// Test if it is a start character ($)
-			if ( *(*(burstBuffer + messageCount)) == '$') {
+			if (*(*(burstBuffer + messageCount)) == '$') {
 				HAL_UART_Transmit(&huart2, "New sentence received\n", strlen("New sentence received\n"), HAL_MAX_DELAY);
 
 				// Read talker ID and sentence type (5 bytes) and store as 5 consecutive elements in the current message array
@@ -124,17 +124,18 @@ int main(void)
 
 				// Test if it is an RMC sentence (which is first in every data burst of NEO-6M)
 				uint8_t isSentenceRMC = !(strncmp((*(burstBuffer + messageCount) + 1), "GPRMC", 5));
-				if(isSentenceRMC == 1) {
-					messageCount = 0;   // Current message in a burst
+				if (isSentenceRMC == 1) {
+					messageCount = 0; // Current message in a burst
 					strncpy(*(burstBuffer + messageCount), "$GPRMC", 6);
-					HAL_UART_Transmit(&huart2, "\nRMC sentence decoded\n", strlen("\nRMC sentence decoded\n"), HAL_MAX_DELAY);
+					HAL_UART_Transmit(&huart2, "\nRMC sentence decoded\n", strlen("\nRMC sentence decoded\n"),
+							HAL_MAX_DELAY);
 					burstBegan = 1;
 				}
 
-				byteInMessage = 6;  // Current byte in a message, counting from 0
+				byteInMessage = 6; // Current byte in a message, counting from 0
 
 				do {
-					if(byteInMessage >= NMEA_0183_MAX_MESSAGE_LENGTH) {
+					if (byteInMessage >= NMEA_0183_MAX_MESSAGE_LENGTH) {
 						break;
 					}
 
@@ -144,14 +145,14 @@ int main(void)
 				} while (byteRead != 0x0a); // Continue until Line Feed (LF or 0x0a in ASCI) is encountered
 
 				messageSize[messageCount] = (byteInMessage);
-				
+
 				// Test if it is an GLL sentence (which is last in every data burst of NEO-6M)
 				uint8_t isSentenceGLL = !(strncmp((*(burstBuffer + messageCount) + 1), "GPGLL", 5));
 
 				messageCount++;
 
 				// Break if no. of messages limit was reached or last message in a burst was read
-				if(messageCount >= NEO_6M_MAX_MESSAGES_PER_BURST || (isSentenceGLL == 1 && burstBegan == 1)) {
+				if (messageCount >= NEO_6M_MAX_MESSAGES_PER_BURST || (isSentenceGLL == 1 && burstBegan == 1)) {
 					break;
 				}
 			}
@@ -159,16 +160,17 @@ int main(void)
 
 		HAL_UART_Transmit(&huart2, "Finished reading\n\n\n", strlen("Finished reading\n\n\n"), HAL_MAX_DELAY);
 
-		for(int i = 0; i < messageCount; i++) {
-			HAL_UART_Transmit(&huart2, (*(burstBuffer + i)), messageSize[i], HAL_MAX_DELAY);
+		for (int i = 0; i < messageCount; i++) {
+			HAL_UART_Transmit(&huart2, (*(burstBuffer + i)), messageSize[i],
+			HAL_MAX_DELAY);
 		}
 
 		// Blink an LED to indicate that new data has been received
-		//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
-		//HAL_Delay(200);
-		//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
+		HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
+		HAL_Delay(500);
+		HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
 
-		while(1) {
+		while (1) {
 
 		}
 
@@ -183,15 +185,13 @@ int main(void)
  * @brief System Clock Configuration
  * @retval None
  */
-void SystemClock_Config(void)
-{
-	RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-	RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+void SystemClock_Config(void) {
+	RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
+	RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
 
 	/** Configure the main internal regulator output voltage
 	 */
-	if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK)
-	{
+	if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1) != HAL_OK) {
 		Error_Handler();
 	}
 
@@ -208,22 +208,19 @@ void SystemClock_Config(void)
 	RCC_OscInitStruct.PLL.PLLN = 40;
 	RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV2;
 	RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
-	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-	{
+	if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
 		Error_Handler();
 	}
 
 	/** Initializes the CPU, AHB and APB buses clocks
 	 */
-	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-			|RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+	RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
 	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
 	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
 	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
 	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK)
-	{
+	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK) {
 		Error_Handler();
 	}
 }
@@ -233,8 +230,7 @@ void SystemClock_Config(void)
  * @param None
  * @retval None
  */
-static void MX_USART1_UART_Init(void)
-{
+static void MX_USART1_UART_Init(void) {
 
 	/* USER CODE BEGIN USART1_Init 0 */
 
@@ -253,8 +249,7 @@ static void MX_USART1_UART_Init(void)
 	huart1.Init.OverSampling = UART_OVERSAMPLING_16;
 	huart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
 	huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-	if (HAL_UART_Init(&huart1) != HAL_OK)
-	{
+	if (HAL_UART_Init(&huart1) != HAL_OK) {
 		Error_Handler();
 	}
 	/* USER CODE BEGIN USART1_Init 2 */
@@ -268,8 +263,7 @@ static void MX_USART1_UART_Init(void)
  * @param None
  * @retval None
  */
-static void MX_USART2_UART_Init(void)
-{
+static void MX_USART2_UART_Init(void) {
 
 	/* USER CODE BEGIN USART2_Init 0 */
 
@@ -288,8 +282,7 @@ static void MX_USART2_UART_Init(void)
 	huart2.Init.OverSampling = UART_OVERSAMPLING_16;
 	huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
 	huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-	if (HAL_UART_Init(&huart2) != HAL_OK)
-	{
+	if (HAL_UART_Init(&huart2) != HAL_OK) {
 		Error_Handler();
 	}
 	/* USER CODE BEGIN USART2_Init 2 */
@@ -303,9 +296,8 @@ static void MX_USART2_UART_Init(void)
  * @param None
  * @retval None
  */
-static void MX_GPIO_Init(void)
-{
-	GPIO_InitTypeDef GPIO_InitStruct = {0};
+static void MX_GPIO_Init(void) {
+	GPIO_InitTypeDef GPIO_InitStruct = { 0 };
 	/* USER CODE BEGIN MX_GPIO_Init_1 */
 	/* USER CODE END MX_GPIO_Init_1 */
 
@@ -316,7 +308,7 @@ static void MX_GPIO_Init(void)
 	__HAL_RCC_GPIOB_CLK_ENABLE();
 
 	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(GPIOA, SMPS_EN_Pin|SMPS_V1_Pin|SMPS_SW_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, SMPS_EN_Pin | SMPS_V1_Pin | SMPS_SW_Pin, GPIO_PIN_RESET);
 
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_RESET);
@@ -328,7 +320,7 @@ static void MX_GPIO_Init(void)
 	HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
 	/*Configure GPIO pins : SMPS_EN_Pin SMPS_V1_Pin SMPS_SW_Pin */
-	GPIO_InitStruct.Pin = SMPS_EN_Pin|SMPS_V1_Pin|SMPS_SW_Pin;
+	GPIO_InitStruct.Pin = SMPS_EN_Pin | SMPS_V1_Pin | SMPS_SW_Pin;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -359,13 +351,11 @@ static void MX_GPIO_Init(void)
  * @brief  This function is executed in case of error occurrence.
  * @retval None
  */
-void Error_Handler(void)
-{
+void Error_Handler(void) {
 	/* USER CODE BEGIN Error_Handler_Debug */
 	/* User can add his own implementation to report the HAL error return state */
 	__disable_irq();
-	while (1)
-	{
+	while (1) {
 	}
 	/* USER CODE END Error_Handler_Debug */
 }
