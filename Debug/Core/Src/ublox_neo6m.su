@@ -1,1 +1,2 @@
-../Core/Src/ublox_neo6m.c:10:25:ublox_neo6m_init	840	static
+../Core/Src/ublox_neo6m.c:10:23:ublox_neo6m_init	16	static
+../Core/Src/ublox_neo6m.c:14:23:ublox_neo6m_readData	808	static

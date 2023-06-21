@@ -108,18 +108,35 @@ int main(void) {
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 
-	printf("GPS-Monitor Startup\n");
+	printf("GPS Monitor Startup\n\n");
+
+	ublox_neo6m_ConfigStruct neo6m_conf = {
+			.huartNeo6m = &huart1,
+			.huartLogging = &huart2 };
+
+	ublox_neo6m_DataStruct neo6m_data;
+	ublox_neo6m_ErrorType err = UBLOX_OK;
+
+	err = ublox_neo6m_init(&neo6m_conf);
+	if (err == UBLOX_OK) {
+		printf("Dbg: U-blox NEO-6M Initialised correctly\n");
+	} else {
+		printf("Err: U-blox NEO-6M Initialisation error!\n");
+	}
+
+	err = ublox_neo6m_readData(&neo6m_conf, &neo6m_data);
+	if (err == UBLOX_OK) {
+		printf("Dbg: U-blox NEO-6M Data read correctly\n");
+	} else {
+		printf("Err: U-blox NEO-6M Data reading error!\n");
+	}
 
 	while (1) {
-
-		ublox_neo6m_init(&huart1, &huart2);
-
-		printf("Finished reading\n");
-
 		// Blink an LED to indicate that new data has been received
 		HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
-		HAL_Delay(500);
+		HAL_Delay(1000);
 		HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_13);
+		HAL_Delay(1000);
 
 		/* USER CODE END WHILE */
 
@@ -133,8 +150,10 @@ int main(void) {
  * @retval None
  */
 void SystemClock_Config(void) {
-	RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
-	RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
+	RCC_OscInitTypeDef RCC_OscInitStruct = {
+			0 };
+	RCC_ClkInitTypeDef RCC_ClkInitStruct = {
+			0 };
 
 	/** Configure the main internal regulator output voltage
 	 */
@@ -244,7 +263,8 @@ static void MX_USART2_UART_Init(void) {
  * @retval None
  */
 static void MX_GPIO_Init(void) {
-	GPIO_InitTypeDef GPIO_InitStruct = { 0 };
+	GPIO_InitTypeDef GPIO_InitStruct = {
+			0 };
 	/* USER CODE BEGIN MX_GPIO_Init_1 */
 	/* USER CODE END MX_GPIO_Init_1 */
 
